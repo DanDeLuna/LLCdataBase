@@ -2,9 +2,10 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const conTable = require('console.table');
 
+
 const connection = mysql.createConnection({
   host: 'localhost',
-  port: 3001,
+ // port: 3001,
   user: 'root',
   password: 'password',
   database: 'employeellc_db',
@@ -71,7 +72,7 @@ const viewDep = () => {
 };
 
 const viewJob = () => {
-  connection.query('SELECT * FROM job', function (err, res) {
+  connection.query('SELECT * FROM role', function (err, res) {
     if (err) throw err;
     console.table(res);
     questions();
@@ -80,7 +81,7 @@ const viewJob = () => {
 
 const viewEmp = () => {
   connection.query(
-    'SELECT employee.id, first_name, last_name, title, salary, dept_name, manager_id FROM ((department JOIN job ON department.id = job.department_id) JOIN employee ON job.id = employee.job_id);',
+    'SELECT employee.id, first_name, last_name, title, salary, manager_id FROM ((department JOIN role ON department.id = role.department_id) JOIN employee ON role.id = employee.id);',
     function (err, res) {
       if (err) throw err;
       console.table(res);
@@ -99,11 +100,11 @@ const addDep = () => {
     ])
     .then(answer => {
       connection.query(
-        'INSERT INTO department (dept_name) VALUES (?)',
+        'INSERT INTO department (name) VALUES (?)',
         [answer.department],
         function (err, res) {
           if (err) throw err;
-          console.log('Department is now in Database!');
+          console.log('Department now in Database!');
           questions();
         }
       );
@@ -115,26 +116,26 @@ const addJob = () => {
       {
         name: 'jobTitle',
         type: 'input',
-        message: 'What is the job title?',
+        message: 'job title?',
       },
       {
         name: 'salary',
         type: 'input',
-        message: 'What is the salary for this job?',
+        message: 'salary for job?',
       },
       {
         name: 'deptId',
         type: 'input',
-        message: 'What is the department ID number?',
+        message: 'department ID number?',
       },
     ])
     .then(answer => {
       connection.query(
-        'INSERT INTO job (title, salary, department_id) VALUES (?, ?, ?)',
+        'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',
         [answer.jobTitle, answer.salary, answer.deptId],
         function (err, res) {
           if (err) throw err;
-          console.log('Job has been added to database!');
+          console.log('Job is now in database!');
           questions();
         }
       );
@@ -146,31 +147,31 @@ const addEmp = () => {
       {
         name: 'nameFirst',
         type: 'input',
-        message: "Enter employee name?",
+        message: "employee name?",
       },
       {
         name: 'nameLast',
         type: 'input',
-        message: "Enter last name",
+        message: "last name",
       },
       {
         name: 'jobId',
         type: 'input',
-        message: "Enter job id?",
+        message: "job id?",
       },
       {
         name: 'managerId',
         type: 'input',
-        message: 'Enter  manager Id?',
+        message: ' manager Id?',
       },
     ])
     .then(answer => {
       connection.query(
-        'INSERT INTO employee (first_name, last_name, job_id, manager_id) VALUES (?, ?, ?, ?)',
+        'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
         [answer.nameFirst, answer.nameLast, answer.jobId, answer.managerId],
         function (err, res) {
           if (err) throw err;
-          console.log('Employee is now added into database!');
+          console.log('Employee added to database!');
           questions();
         }
       );
@@ -193,7 +194,7 @@ const upEmp = () => {
     ])
     .then(answer => {
       connection.query(
-        'UPDATE employee SET job_id=? WHERE id=?',
+        'UPDATE employee SET role_id=? WHERE id=?',
         [answer.jobId, answer.id],
         function (err, res) {
           if (err) throw err;
